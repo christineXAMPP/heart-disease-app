@@ -142,7 +142,7 @@ with col1:
 
 with col2:
     st.subheader("Batch prediction (CSV)")
-    st.markdown("Upload a CSV with columns matching the features in `metadata.json` (or compatible names).")
+    st.markdown("Upload a CSV with columns matching the features in `metadata.json`.")
     uploaded = st.file_uploader("Upload CSV", type=["csv"])
     if uploaded is not None:
         try:
@@ -158,7 +158,7 @@ with col2:
             st.error(f"Error processing file: {e}")
 
 st.markdown("---")
-st.subheader("Model metrics & dataset (optional)")
+st.subheader("Model metrics & Dataset")
 
 if cleaned_df is None:
     st.info("No cleaned dataset found in data/cleaned_heart_disease_dataset.csv — put one there to see metrics and EDA.")
