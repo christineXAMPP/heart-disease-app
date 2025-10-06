@@ -96,8 +96,8 @@ def predict_df(X_df: pd.DataFrame) -> pd.DataFrame:
     for name, clf in models.items():
         preds = clf.predict(X_scaled)
         out[f"{name}_pred"] = preds
-        # --- Inside your predict_df() function ---
-out[f"{name}_label"] = np.where(preds == 1, "No Disease", "Disease")
+        st.write(f"- **{name}** → { 'No Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'Disease' }")
+
 
     return out
 
