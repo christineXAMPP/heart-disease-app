@@ -138,8 +138,7 @@ with col1:
         result = predict_df(pre)
         st.markdown("**Predictions:**")
         for name in models.keys():
-            # --- Inside your Streamlit display section ---
-st.write(f"- **{name}** → { 'No Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'Disease' }")
+           st.write(f"- **{name}** → { 'No Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'Disease' }")
 
         st.write("Full output:")
         st.dataframe(result)
