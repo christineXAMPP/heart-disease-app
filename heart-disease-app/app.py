@@ -43,8 +43,6 @@ def load_artifacts():
 
     return artifacts
 
-
-# Load everything
 art = load_artifacts()
 FEATURE_ORDER = art["metadata"]["features"]
 models = {
@@ -65,8 +63,9 @@ st.markdown(
     """
 )
 
-# ---------------- Helper Preprocessing Function ----------------
+# helper preprocessing function
 def preprocess_input(df: pd.DataFrame, cleaned_reference: pd.DataFrame = None) -> pd.DataFrame:
+    # common rename map (tries to handle alternate column names)
     rename_map = {
         "trtbps": "trestbps",
         "exng": "exang",
@@ -76,15 +75,14 @@ def preprocess_input(df: pd.DataFrame, cleaned_reference: pd.DataFrame = None) -
         "thalach": "thalachh"
     }
     df = df.rename(columns=rename_map)
-
-    # Ensure all expected columns exist
+    # ensure expected features exist
     for col in FEATURE_ORDER:
         if col not in df.columns:
             df[col] = np.nan
     df = df[FEATURE_ORDER].copy()
     df = df.apply(pd.to_numeric, errors="coerce")
 
-    # Fill missing with median
+    # fill missing using medians from cleaned dataset when available, else column medians
     if cleaned_reference is not None:
         medians = cleaned_reference[FEATURE_ORDER].median()
     else:
@@ -92,25 +90,22 @@ def preprocess_input(df: pd.DataFrame, cleaned_reference: pd.DataFrame = None) -
     df = df.fillna(medians)
     return df
 
-
-# ---------------- Prediction Function ----------------
 def predict_df(X_df: pd.DataFrame) -> pd.DataFrame:
     X_scaled = scaler.transform(X_df)
     out = X_df.copy()
     for name, clf in models.items():
         preds = clf.predict(X_scaled)
         out[f"{name}_pred"] = preds
-        out[f"{name}_label"] = np.where(preds == 1, "No Disease", "Disease")  # flipped label for display
+       st.write(f"- **{name}** → { 'Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'No Disease' }")
     return out
 
-
-# ---------------- Layout ----------------
+# Layout: two columns
 col1, col2 = st.columns(2)
 
-# -------- Single Prediction Section --------
 with col1:
     st.subheader("Single prediction")
     with st.form("single"):
+        # create input controls for each feature (arranged columns)
         c1, c2 = st.columns(2)
         with c1:
             age = st.number_input("age", min_value=0, max_value=120, value=45)
@@ -141,13 +136,11 @@ with col1:
         result = predict_df(pre)
         st.markdown("**Predictions:**")
         for name in models.keys():
-            st.write(f"- **{name}** → { 'No Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'Disease' }")
+         st.write(f"- **{name}** → { 'Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'No Disease' }")
 
         st.write("Full output:")
         st.dataframe(result)
 
-
-# -------- Batch Prediction Section --------
 with col2:
     st.subheader("Batch prediction (CSV)")
     st.markdown("Upload a CSV with columns matching the features in `metadata.json`.")
@@ -159,13 +152,12 @@ with col2:
             df_out = predict_df(df_pre)
             st.write("Preview of predictions:")
             st.dataframe(df_out.head(50))
+            # download
             csv_bytes = df_out.to_csv(index=False).encode("utf-8")
             st.download_button("Download predictions CSV", data=csv_bytes, file_name="predictions.csv", mime="text/csv")
         except Exception as e:
             st.error(f"Error processing file: {e}")
 
-
-# -------- Model Metrics Section --------
 st.markdown("---")
 st.subheader("Model metrics & Dataset")
 
