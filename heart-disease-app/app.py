@@ -96,9 +96,7 @@ def predict_df(X_df: pd.DataFrame) -> pd.DataFrame:
     for name, clf in models.items():
         preds = clf.predict(X_scaled)
         out[f"{name}_pred"] = preds
-        st.write(f"- **{name}** → { 'No Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'Disease' }")
-
-
+       st.write(f"- **{name}** → { 'Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'No Disease' }")
     return out
 
 # Layout: two columns
@@ -138,7 +136,7 @@ with col1:
         result = predict_df(pre)
         st.markdown("**Predictions:**")
         for name in models.keys():
-           st.write(f"- **{name}** → { 'No Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'Disease' }")
+         st.write(f"- **{name}** → { 'Disease' if int(result[f'{name}_pred'].iloc[0])==1 else 'No Disease' }")
 
         st.write("Full output:")
         st.dataframe(result)
